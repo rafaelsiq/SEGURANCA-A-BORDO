@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 import os
 import google.generativeai as genai
-from flask_cors import CORS
-import google.ai.generativelanguage as glm
 import tempfile
 
 app = Flask(__name__)
@@ -29,6 +28,7 @@ model = genai.GenerativeModel(model_name='gemini-1.5-pro-latest',
 
 
 @app.route('/process_audio', methods=['POST'])
+@cross_origin()
 def process_audio():
     if 'file' not in request.files:
         return {'error': 'Nenhum arquivo de áudio enviado'}, 400
@@ -36,8 +36,8 @@ def process_audio():
     audio_file = request.files['file']
     if audio_file.filename.endswith('.wav'):
         text = audio_processing(audio_file)
-        print(jsonify({'text': text}))
-        return jsonify({'text': text}), 200
+        response = jsonify({'text': text}), 200
+        return response
     else:
         return {'error': 'Formato de arquivo não suportado. Apenas arquivos .wav são aceitos'}, 400
 
@@ -50,16 +50,21 @@ def save_temporary_file(audio_file):
 
 
 def audio_processing(audio_file):
-    prompt = str('Com base no audio enviado, retorne uma as informações de status,humor, descricao e acoes que um terceiro pode tomar,',
-                 'separadas por ##. considere status possiveis = "em andamento, finalizada, stand by", considere humor como ="violento,',
-                 'brando, ou clima tenso" e considere ações como ações que possam ser tomadas para manter a segurança das pessoas envolvidas',
-                 'no corrida. exemplo1: ##status="finalizado"##humor="brando"##descricao="a corrida finalizou rapidamente sem problemas"##acoes="nenhuma',
-                 'exemplo1: ##status="em andamento"##humor="violento"##descricao="ha indicios de um assalto"##acoes="ligar para a policia"')
-    history = [{
+    prompt = str('input: audio'
+                 'Informações Gerais:'
+                 'Status: (em andamento, finalizada)'
+                 'Humor: (Neutro, Agitado, Deprimido,  Entusiasmado, Com medo, Zangado)'
+                 'Descrição: Breve resumo do que está acontecendo no áudio.'
+                 'Ações: Sugestões curtas de ações que podem ser tomadas para manter a segurança das pessoas envolvidas.'
+                 'policia: Informa uma boolean que será true, caso seja necessario contactar a policia'
+                 'Exemplos de output:'
+                 '##Status="finalizado"##Humor="brando"##Descrição="A corrida finalizou rapidamente sem problemas"##Ações="Nenhuma"##Polícia="false"'
+                 '##Status="em andamento"##Humor="violento"##Descrição="Há indícios de um assalto"##Ações="Ligar para a polícia"##Polícia="true"')
+
+    convo = model.start_chat(history={
         "role": "user",
                 "parts": [genai.upload_file(save_temporary_file(audio_file))]
-    }]
-    convo = model.start_chat(history=history)
+    })
     response = convo.send_message(prompt)
     return response.text
 

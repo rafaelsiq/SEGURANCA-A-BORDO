@@ -1,11 +1,31 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
 import './LeftSection.css';
 
-function LeftSection({resp, setResponse}) {
+function LeftSection({ setResponse }) {
+  const [trip, setTrip] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioChunks, setAudioChunks] = useState([]);
   const mediaRecorderRef = useRef(null);
+
+  useEffect(() => {
+    if (trip && !recording) {
+      startRecording();
+    } else if (!trip && recording) {
+      stopRecording();
+    }
+  }, [trip]);
+
+  useEffect(() => {
+    let intervalId;
+    if (trip && recording) {
+      intervalId = setInterval(() => {
+        stopRecording();
+        startRecording();
+      }, 10000); 
+    }
+    return () => clearInterval(intervalId);
+  }, [trip, recording]);
 
   const startRecording = () => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -48,18 +68,13 @@ function LeftSection({resp, setResponse}) {
   
     fetch('http://127.0.0.1:5000/process_audio', {
       method: 'POST',
-      body: formData
+      body: formData,
     })
     .then(response => {
-      if (!response.ok) {
-        throw new Error('Erro ao enviar áudio para a API.');
-      }
-      setResponse(response.json())
-      return resp;
-
+      return response.json();
     })
     .then(data => {
-      console.log('Texto gerado:', data.text);
+      setResponse(data)
     })
     .catch(error => {
       console.error('Erro ao enviar áudio:', error);
@@ -68,11 +83,7 @@ function LeftSection({resp, setResponse}) {
   
 
   const handleClick = () => {
-    if (recording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
+    setTrip(!trip);
   };
 
   return (
@@ -80,11 +91,11 @@ function LeftSection({resp, setResponse}) {
       <h2>Motorista</h2>
       <p>Deste lado exemplifico o app do motorista</p>
       <button className={`record-button ${recording ? 'recording' : ''}`} onClick={handleClick}>
-        {recording ? 'Parar gravação' : 'Iniciar gravação'}
+        {trip ? 'Parar Viagem' : 'Iniciar Viagem'}
       </button>
       <div className="microphone-icon">
         <div className="pulse-ring"></div>
-        <FaMicrophone className="microphone" color={recording ? 'red' : 'black'} />
+        <FaMicrophone className="microphone" color={trip ? 'red' : 'black'} />
       </div>
     </div>
   );
