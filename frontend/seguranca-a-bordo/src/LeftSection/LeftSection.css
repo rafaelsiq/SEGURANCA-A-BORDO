@@ -1,0 +1,66 @@
+.left-section {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    position: relative; /* Para posicionamento absoluto do ícone */
+  }
+  
+  .microphone-icon {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: pulse 1s infinite alternate; /* Animação de pulso */
+  }
+  
+  .microphone {
+    font-size: 30px;
+    color: #333;
+  }
+  
+  
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(0);
+    }
+    70% {
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.5);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(1.1);
+    }
+  }
+  
+  
+  .record-button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .record-button.recording {
+    background-color: #f44336; /* Red */
+  }
+  
+  .record-button:hover {
+    background-color: #45a049; /* Darker green */
+  }
+  

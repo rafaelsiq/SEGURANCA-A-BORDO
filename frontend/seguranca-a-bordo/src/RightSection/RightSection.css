@@ -1,0 +1,23 @@
+.right-section {
+    padding: 20px;
+    background-color: #f0f0f0;
+    border-left: 1px solid #ccc;
+    flex: 1;
+  }
+  
+  .trip-info {
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+  }
+  
+  .trip-info h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .trip-info p {
+    font-size: 16px;
+  }
+  
